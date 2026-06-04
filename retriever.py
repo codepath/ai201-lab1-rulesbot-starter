@@ -83,9 +83,10 @@ def retrieve(query, n_results=N_RESULTS):
     metadatas = relevant_chunks["metadatas"][0]
     distances = relevant_chunks["distances"][0]
 
-    print
+    print(f"Retrieved {len(documents)} relevant chunk(s) for query: '{query}'")
     for text, metadata, distance in zip(documents, metadatas, distances):
         print(f"[{metadata['game']}] (dist: {distance:.3f})")
+    print("\n")
     
     # Build return list: each item has text, game, distance
     retrieved_chunks = []

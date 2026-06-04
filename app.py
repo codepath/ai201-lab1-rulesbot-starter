@@ -123,7 +123,7 @@ with gr.Blocks(
                                margin:0 0 0.5rem; letter-spacing:0.05em;">
                         📚 LOADED RULE BOOKS
                     </p>
-                    <ul style="font-size:0.85rem; color:#5b21b6; list-style:none;
+                    <ul style="font-size:0.85rem; color:#000000; list-style:none;
                                 padding:0; margin:0; line-height:1.8;">
                         <li>🏔️ Catan</li>
                         <li>🔍 Clue</li>

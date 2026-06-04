@@ -45,7 +45,10 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Describe how you will use `_collection.query()` to find relevant chunks. What arguments will you pass, and why?*
 
 ```
-[your answer here]
+I'd use `_collection.query()` to run a semantic similarity vector search to find top n chunks that have cosine similarity score closed to the user query. Some arguments I need to pass are:
+    - query_texts : a list containing your query string
+    - n_results   : how many results to return
+    - include     : what to return — use ["documents", "metadatas", "distances"]
 ```
 
 ---
@@ -55,7 +58,10 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Sketch out what one item in your return list looks like as a concrete example. Where does each field come from in the query results?*
 
 ```
-[your answer here]
+Each item in the return list will have these fields:
+    - "text"     : the chunk text
+    - "game"     : the game name (pull this from metadatas)
+    - "distance" : the similarity score (lower = more similar for cosine)
 ```
 
 ---
@@ -65,7 +71,8 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *`_collection.query()` returns nested lists. Describe what index you need to access to get the actual list of results for a single query, and why the nesting exists.*
 
 ```
-[your answer here]
+we'd need to use index 0 to get the actual results, as we only have a single query.
+Nesting exists because `_collection.query()` takes a list of query_texts as an input
 ```
 
 ---
@@ -75,7 +82,9 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Will you filter out results above a certain distance score, or return all `n_results` regardless of how relevant they are? What are the tradeoffs of each approach?*
 
 ```
-[your answer here]
+Results that have similarity score higher than a certain threshold can be identified as irrelevant and thus we may discard them instead of trying to return all `n_results`. The tradeoff are between precision + complexity of the RAG system vs. recall
+
+Lower = more similar. A score around 0.1–0.2 means highly relevant; around 0.7–0.9 means loosely related at best.
 ```
 
 ---
@@ -85,7 +94,11 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *How does your implementation behave when: (a) the collection is empty, (b) the query matches no chunks well, (c) the query matches chunks from multiple games?*
 
 ```
-[your answer here]
+(a) If the collection is empty, `retrieve()` returns `[]` immediately.
+
+(b) If the query matches no chunks well, the function should return only the highest-ranked chunks that still pass the relevance threshold; if none are relevant, it should return `[]` so `generate_response()` can fall back cleanly instead of using weak context.
+
+(c) If the query matches chunks from multiple games, `retrieve()` should return the top-ranked chunks across all games, sorted by distance, without forcing them to come from just one game. The final answer can then cite the relevant game(s) from the returned metadata.
 ```
 
 ---
@@ -97,14 +110,27 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 **Test query and top result returned:**
 
 ```
-Query: [your test query]
-Top result game: [game name]
-Distance score: [score]
-Does it make sense? [yes / no / explain]
+Query: "What happens when you roll a 7?"
+Top result: [Catan] (dist: 0.567)
+            [Risk] (dist: 0.617)
+            [Codenames] (dist: 0.629)
+Does it make sense? not really, multiple games are returned while only catan is relevant
+
+Query: "How do you win?"
+Top result: [Clue] (dist: 0.632)
+            [Risk] (dist: 0.664)
+            [Risk] (dist: 0.695)
+Does it make sense? no, scores are high
+
+Query: "What happens when you run out of disease cubes in Pandemic?"
+Top result: [Pandemic] (dist: 0.459)
+            [Pandemic] (dist: 0.485)
+            [Pandemic] (dist: 0.575)
+Does it make sense? yes, all belong to Pandemic
 ```
 
 **One thing about the query results that surprised you:**
 
 ```
-[your answer here]
+the similarity score remains similar, fluctuating around 0.5, even for different value of chunk_size, overlap, and min_length 
 ```

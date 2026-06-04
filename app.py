@@ -29,6 +29,16 @@ def run_ingestion():
 
     for doc in documents:
         chunks = chunk_document(doc["text"], doc["game"])
+        
+        # --- uncomment the lines below to see the first 5 chunks produced for each game during ingestion (you may need to delete the ./chroma_db folder first) ---
+        # use this to determine if the chunk's size and boundaries makes sense
+        # print(f"\nFirst 5 chunks for {doc['game']}:")
+        # for i, chunk in enumerate(chunks[:5], start=1):
+        #     print(f"\nChunk {i}")
+        #     print("ID:", chunk["chunk_id"])
+        #     print("Game:", chunk["game"])
+        #     print("Text:", chunk["text"])
+    
         all_chunks.extend(chunks)
 
     if all_chunks:

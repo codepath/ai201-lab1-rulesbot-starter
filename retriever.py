@@ -3,6 +3,9 @@ from chromadb.utils import embedding_functions
 from config import CHROMA_COLLECTION, CHROMA_PATH, EMBEDDING_MODEL, N_RESULTS
 
 # Embedding function and ChromaDB client are initialized once at module load.
+# (If you need to re-ingest (e.g. after a config change), delete the `./chroma_db` folder first:
+#   - rm -rf chroma_db/ 
+#   - python app.py
 # sentence-transformers downloads the model on first use — this may take
 # 30–60 seconds the very first time. Subsequent runs use a local cache.
 _ef = embedding_functions.SentenceTransformerEmbeddingFunction(
@@ -68,5 +71,30 @@ def retrieve(query, n_results=N_RESULTS):
     if _collection.count() == 0:
         return []
 
-    # Your implementation here.
-    return []
+    # Run semantic search via _collection.query()
+    relevant_chunks = _collection.query( # type: dict of lists with keys "documents", "metadatas", "distances"
+        query_texts=[query],
+        n_results=n_results,
+        include=["documents", "metadatas", "distances"]
+    )
+    
+    # Extract results for this single query (index [0])
+    documents = relevant_chunks["documents"][0]
+    metadatas = relevant_chunks["metadatas"][0]
+    distances = relevant_chunks["distances"][0]
+
+    print
+    for text, metadata, distance in zip(documents, metadatas, distances):
+        print(f"[{metadata['game']}] (dist: {distance:.3f})")
+    
+    # Build return list: each item has text, game, distance
+    retrieved_chunks = []
+    for text, metadata, distance in zip(documents, metadatas, distances):
+        retrieved_chunks.append({
+            "text": text,
+            "game": metadata["game"],
+            "distance": distance
+        })
+    
+    # Results are already sorted by distance (ascending) from ChromaDB
+    return retrieved_chunks

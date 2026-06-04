@@ -49,24 +49,27 @@ def embed_and_store(chunks):
 def retrieve(query, n_results=N_RESULTS):
     """
     Find the most relevant rule chunks for a user's question.
-
-    TODO — Milestone 2:
-
-    Use _collection.query() to run a semantic search. It takes:
-      - query_texts : a list containing your query string
-      - n_results   : how many results to return
-      - include     : what to return — use ["documents", "metadatas", "distances"]
-
-    Return a list of dicts, each with:
-      - "text"     : the chunk text
-      - "game"     : the game name (pull this from metadatas)
-      - "distance" : the similarity score (lower = more similar for cosine)
-
-    Note: _collection.query() returns nested lists (one per query). You only
-    have one query, so you'll want index [0] to get the actual results.
     """
     if _collection.count() == 0:
         return []
 
-    # Your implementation here.
-    return []
+    results = _collection.query(
+        query_texts=[query],
+        n_results=n_results,
+        include=["documents", "metadatas", "distances"]
+    )
+
+    documents = results["documents"][0]
+    metadatas = results["metadatas"][0]
+    distances = results["distances"][0]
+
+    retrieved_chunks = []
+
+    for i in range(len(documents)):
+        retrieved_chunks.append({
+            "text": documents[i],
+            "game": metadatas[i]["game"],
+            "distance": distances[i]
+        })
+
+    return retrieved_chunks

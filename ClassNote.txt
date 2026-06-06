@@ -1,0 +1,83 @@
+1. why Getting the ghost data?
+
+Embedding: similar word would have similar number (vector) -> classic paper for NLP class
+Distance for similar word would be close -> Searching for mathcing meaning
+
+ChromaDB -> serch from vector
+Pinecone is a distributed vector database -> more prod env
+embadding model change might caused problem.
+Diff company use diff embadding model & different phase use diff
+similarity search 
+topK to see the chunk similarity
+engineer build promp in the beginning, then let the automatiion prompt code building the prompt
+no matching -> still using topK
+fix size -> first choice to try (simple and consistence)
+semantic (meaning word or token) -> run embadding model when chunking -> cost -> in prod env 
+recursive -> respec nature doc -> -> close to real world -> complex 
+big -> small
+podcast : sematic -> Recursive (long, conversational, minimal structure to exploit)
+AIP doc : fixed size -> recursize/fixed size (depands on) Recursive (headers and sections are natural split points)
+YELP review : recursize (fixed size) bc: small text Fixed-size (already short, consistent, self-contained)
+Faithfulness（忠实度/忠诚度） 是用来衡量大模型生成回答时是否“遵纪守法”的核心指标
+Hybrid Search : 一种将“语义向量搜索”与“传统关键词检索”结合起来的核心技术
+
+
+<INGEST> Do once
+Rule Book
+↓ Cut into many small chunks
+↓ Convert to embedding
+↓ Store in Vector Database (ChromaDB, Pinecone, FAISS, Weaviate)
+    Ingestion only has to happen once -> Save into DB and does not need to change much -> Next time when need to ask question, can direcly use the data from DB
+
+
+<RETRIEVE>
+user ask: How many PTO days do I get?
+↓ query_embedding :  = embedding("How many PTO days do I get?") ---> [0.45, -0.31, 0.82, ...]
+↓ Search in Vector DB : top_k = similarity_search(query_embedding)
+↓ 找出最相近的 chunks。
+ Chunk 45:
+ Employees receive 10 PTO days...
+ Chunk 46:
+ Additional PTO is granted...
+ Chunk 47:
+ Unused PTO may roll over...
+↓ Semantic Similarity Search 語意相似搜尋
+
+<GENERATE> 
+After finding the relevant chunks, place them in the Prompt.
+↓ Relative chunk + Question Send to GPT
+    Context:
+    Chunk 45:
+    Employees receive 10 PTO days annually.
+    Chunk 46:
+    Unused PTO can be rolled over up to 5 days.
+↓ Question:
+    How many PTO days do employees get?
+
+The actual Prompt might look like (First from engineer to provide the guide line, after then it is automatic promp generated)
+'''
+Answer using only the provided context.
+Context:
+Employees receive 10 PTO days annually.
+Unused PTO can roll over up to 5 days.
+
+Question:
+How many PTO days do employees get?
+'''
+
+'''
+GPT reply
+Employees receive 10 PTO days annually.
+
+Source: Chunk 45
+'''
+
+Grounded Answer: The answer must be based on the content of the document; LLM cannot make things up.
+Cited Answer: Provide evidence 
+    eg. According to PTO Policy Section 3.2, employees receive 10 PTO days annually.
+    eg. Source: chunk_45
+
+<UI>
+Display in UI
+
+

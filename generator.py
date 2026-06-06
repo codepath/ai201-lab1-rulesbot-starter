@@ -35,5 +35,46 @@ def generate_response(query, retrieved_chunks):
             "Try rephrasing your question — or check that your ingestion pipeline is working."
         )
 
+
     # Your implementation here.
-    return "⚙️ Response generation not yet implemented. Complete Milestone 3 to activate answers."
+
+    # step1: Format the retrieved chunks into a context block for the prompt, then call the LLM to generate a grounded answer.
+    context = "\n\n".join(
+        f"From [{chunk['game']}]:\n{chunk['text']}" 
+        for chunk in retrieved_chunks
+    )
+
+    # step2: Grounding System Prompt
+    # Craft instructions to ensure the model answers only based on the provided context, and clearly indicates when information is missing.
+    system_prompt = (
+        "You are a board game rules assistant that answers questions about board game rules based solely on the provided context. "
+
+        "Use ONLY the the retrieved rule text provided. "
+
+        "If the answer is not in the provided rules, say 'I don't know based on the provided rules.' "
+
+        "Do not use outside knowledge. Do not make assumptions. Do not fill in missing information."
+
+        "Clearly indicate which game each piece of information comes from."
+    )
+
+    # step3: Call the LLM with the system prompt and the context to generate a response.
+    response = _client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=[
+            {
+                "role": "system", 
+                "content": system_prompt
+             },
+            {
+                "role": "user", 
+                "content": f"""
+                Question:{query}\n
+                Context:{context}\n"""
+             }
+        ]
+    )
+
+    # step4: Return the generated response as a plain string.
+    return response.choices[0].message.content.strip()
+

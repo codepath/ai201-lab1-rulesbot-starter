@@ -69,4 +69,23 @@ def retrieve(query, n_results=N_RESULTS):
         return []
 
     # Your implementation here.
-    return []
+    results = _collection.query(
+        query_texts=[query],
+        n_results=n_results,
+        include=["documents", "metadatas", "distances"]
+    )
+
+    # Extract the relevant information from the results.
+    retrieved_chunks = []
+
+    # len(results["documents"][0]) is the number of results returned for the single query.
+    # results["documents"][0] is the list of the 1st query's retrieved documents(n_results similarity).
+    for i in range(len(results["documents"][0])):
+        print(f"[{results['metadatas'][0][i]['game']}] (dist: {results['distances'][0][i]:.3f}) {results['documents'][0][i][:80]}...")
+        retrieved_chunks.append({
+            "text": results["documents"][0][i],
+            "game": results["metadatas"][0][i]["game"],
+            "distance": results["distances"][0][i]
+        })
+
+    return retrieved_chunks

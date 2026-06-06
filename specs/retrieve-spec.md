@@ -45,7 +45,8 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Describe how you will use `_collection.query()` to find relevant chunks. What arguments will you pass, and why?*
 
 ```
-[your answer here]
+[I will call _collection.query() with query_texts=[query], n_results=n_results, and include=["documents", "metadatas", "distances"].
+query_texts must be a list because ChromaDB supports multiple queries at once. n_results controls how many relevant chunks to return. include tells ChromaDB to return the chunk text, metadata such as the game name, and the distance score.]
 ```
 
 ---
@@ -55,7 +56,21 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Sketch out what one item in your return list looks like as a concrete example. Where does each field come from in the query results?*
 
 ```
-[your answer here]
+[
+    One item in the returned list looks like:
+
+{
+    "text": "A reverse card changes the direction of play.",
+    "game": "Uno",
+    "distance": 0.08
+}
+
+The "text" field comes from results["documents"][0][i], which contains the retrieved chunk text.
+
+The "game" field comes from results["metadatas"][0][i]["game"], which stores the game name in the metadata.
+
+The "distance" field comes from results["distances"][0][i], which represents how similar the chunk is to the query. Smaller distances indicate more relevant results.
+]
 ```
 
 ---
@@ -65,7 +80,9 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *`_collection.query()` returns nested lists. Describe what index you need to access to get the actual list of results for a single query, and why the nesting exists.*
 
 ```
-[your answer here]
+[
+    Because _collection.query() accepts multiple query texts, it returns one list of results per query. Since I only pass one query with query_texts=[query], I use index [0] to access the actual results for that single query, like results["documents"][0], results["metadatas"][0], and results["distances"][0].
+]
 ```
 
 ---
@@ -75,7 +92,39 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Will you filter out results above a certain distance score, or return all `n_results` regardless of how relevant they are? What are the tradeoffs of each approach?*
 
 ```
-[your answer here]
+[
+    There are two possible approaches:
+
+1. Return all n_results (n_results=3)
+
+In this approach, the retriever returns all results provided by ChromaDB, regardless of their distance scores.
+
+Advantages:
+- Simple to implement and understand.
+- Reduces the risk of filtering out potentially useful chunks.
+- Works well when the embedding model's distance scores are not well calibrated.
+
+Disadvantages:
+- Some returned chunks may be only weakly related to the query.
+- Additional irrelevant context may increase prompt size and token usage.
+- Noisy results could negatively affect the LLM's final answer.
+
+2. Apply a relevance threshold (if distance < 0.5:)
+
+In this approach, results with distance scores above a chosen threshold are filtered out before being returned.
+
+Advantages:
+- Improves precision by removing less relevant chunks.
+- Reduces noise in the retrieved context.
+- Can improve answer quality when the threshold is chosen appropriately.
+
+Disadvantages:
+- Relevant chunks may be accidentally removed if the threshold is too strict.
+- The best threshold often depends on the embedding model and dataset.
+- In some cases, very few or even no results may be returned.
+
+For this assignment, I would return all n_results without applying a threshold because it keeps the retriever simple and avoids accidentally discarding useful information. However, a relevance threshold could be added later to improve retrieval quality after evaluating the distance score distribution.
+]
 ```
 
 ---

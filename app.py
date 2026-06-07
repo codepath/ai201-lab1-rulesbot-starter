@@ -81,7 +81,7 @@ with gr.Blocks(
                     height=440,
                     type="messages",
                     placeholder=(
-                        "<div style='text-align:center; color:#9ca3af; margin-top:3rem;'>"
+                        "<div style='text-align:center; color:#6b7280; margin-top:3rem; font-size:1.05rem;'>"
                         "Ask a rules question to get started — no arguing required 🎯"
                         "</div>"
                     ),
@@ -90,6 +90,7 @@ with gr.Blocks(
                     placeholder='e.g. "Can I build a road through someone else\'s settlement?"',
                     container=False,
                     scale=7,
+                    show_label=False,
                 ),
                 examples=[
                     "How do you set up the board in Catan?",
@@ -113,7 +114,7 @@ with gr.Blocks(
                                margin:0 0 0.5rem; letter-spacing:0.05em;">
                         📚 LOADED RULE BOOKS
                     </p>
-                    <ul style="font-size:0.85rem; color:#5b21b6; list-style:none;
+                    <ul style="font-size:0.85rem; color:#1a1315; list-style:none;
                                 padding:0; margin:0; line-height:1.8;">
                         <li>🏔️ Catan</li>
                         <li>🔍 Clue</li>

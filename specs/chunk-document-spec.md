@@ -116,11 +116,13 @@ handle these cases better, at the cost of more implementation complexity.
 **Actual chunk count produced across all 8 rule books:**
 
 ```
-[your answer here]
+149
 ```
 
 **One thing that surprised you or didn't match your expectations:**
 
 ```
-[your answer here]
+What if one chunk has 2 games context? 
+For wiki or object lured content, we go with the semantic chunking right, but then why did we use this fixed window chunking?
+What if that 50 length ones also has some meaning which we are not storing and what if answer is found in that? - Why are we loosing that info?
 ```

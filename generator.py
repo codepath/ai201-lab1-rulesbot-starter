@@ -3,6 +3,29 @@ from config import GROQ_API_KEY, LLM_MODEL
 
 _client = Groq(api_key=GROQ_API_KEY)
 
+# Shared so the model's "not found" reply and the empty-results fallback match.
+FALLBACK_MESSAGE = (
+    "I couldn't find that in the loaded rule books. Try rephrasing your "
+    "question, or make sure the relevant rulebook has been ingested."
+)
+
+# System prompt = grounding instruction + citation instruction (the rules of
+# engagement that never change per query). See generate-response-spec.md.
+SYSTEM_PROMPT = (
+    "You are a board game rules assistant. Answer the user's question using "
+    "ONLY the rule text provided in the context below. Do not use any outside "
+    "or prior knowledge about board games, even if you are confident you know "
+    "the answer. If the context does not contain enough information to answer "
+    "the question, reply exactly: 'I couldn't find that in the loaded rule "
+    "books.' Do not guess, infer beyond what the text states, or fill gaps "
+    "with general knowledge. Quote or paraphrase only what the context "
+    "supports.\n\n"
+    "Always state which game your answer comes from. Begin your reply with the "
+    "game name in brackets, e.g. '[Catan] ...'. The game name is given in the "
+    "bracketed label above each passage in the context. If your answer draws "
+    "on more than one game, name each game you used."
+)
+
 
 def generate_response(query, retrieved_chunks):
     """
@@ -30,10 +53,25 @@ def generate_response(query, retrieved_chunks):
     Return the response as a plain string.
     """
     if not retrieved_chunks:
-        return (
-            "I couldn't find anything relevant in the loaded rule books. "
-            "Try rephrasing your question — or check that your ingestion pipeline is working."
-        )
+        return FALLBACK_MESSAGE
 
-    # Your implementation here.
-    return "⚙️ Response generation not yet implemented. Complete Milestone 3 to activate answers."
+    # Build the context block: each chunk labeled by game, separated by a
+    # visible delimiter, in retrieve()'s order (most relevant first).
+    context_block = "\n---\n".join(
+        f"[{chunk['game']}]\n{chunk['text']}" for chunk in retrieved_chunks
+    )
+
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": f"Context:\n{context_block}\n\nQuestion: {query}",
+        },
+    ]
+
+    response = _client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=messages,
+        temperature=0,
+    )
+    return response.choices[0].message.content

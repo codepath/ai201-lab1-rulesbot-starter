@@ -111,16 +111,16 @@ handle these cases better, at the cost of more implementation complexity.
 
 ## Implementation Notes
 
-*Fill this in after running the app and confirming ingestion worked.*
+*I have run the app and confirming ingestion worked perfectly.*
 
 **Actual chunk count produced across all 8 rule books:**
 
 ```
-[your answer here]
+[149 chunks has been produced]
 ```
 
 **One thing that surprised you or didn't match your expectations:**
 
 ```
-[your answer here]
+[Everything went well for me and all my expectations have been met]
 ```

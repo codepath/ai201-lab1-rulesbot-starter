@@ -39,7 +39,7 @@ User query
     app.py
 ```
 
-Components 1 and 4 are fully implemented. Components 2 and 3 are partially implemented — the infrastructure is in place, but the core logic is stubbed out and left for you.
+Components 1 and 4 are fully implemented, and so is ingestion (chunking + embedding). What's left for you is the core of components 2 and 3: `retrieve()` and `generate_response()`.
 
 ---
 
@@ -61,7 +61,7 @@ Groq provides fast inference on Llama 3.3 70B via a free API tier. The model is 
 
 ### Distance metric: cosine similarity
 
-Lower distance = more similar. Results from `_collection.query()` include a `distances` field — a distance of 0 means identical, and values above ~0.5 typically indicate weak relevance for this embedding model. This matters for `generate_response()`: chunks with high distances may not be relevant enough to include in context.
+Lower distance = more similar. Results from `_collection.query()` include a `distances` field — a distance of 0 means identical, and with this embedding model and chunking, clearly relevant results typically score ~0.35–0.55 and off-topic chunks ~0.6+ — treat the *relative ordering* and whether the right game came back as the signal, not any absolute threshold. This matters for `generate_response()`: chunks with high distances may not be relevant enough to include in context.
 
 ---
 
@@ -72,9 +72,9 @@ Lower distance = more similar. Results from `_collection.query()` include a `dis
 | `app.py` | ✅ Complete | Gradio UI, startup orchestration, ingestion trigger |
 | `config.py` | ✅ Complete | Central configuration for models, paths, retrieval params |
 | `ingest.py` — `load_documents()` | ✅ Complete | Reads all `.txt` files from `/docs`, returns structured dicts |
-| `ingest.py` — `chunk_document()` | 🔲 Your spec + implementation | Splits a document into chunks for embedding |
+| `ingest.py` — `chunk_document()` | ✅ Complete | Splits a document into chunks for embedding |
 | `retriever.py` — ChromaDB init | ✅ Complete | Client, collection, and embedding function are initialized |
-| `retriever.py` — `embed_and_store()` | 🔲 Your spec + implementation | Embeds chunks and adds them to the collection |
+| `retriever.py` — `embed_and_store()` | ✅ Complete | Embeds chunks and adds them to the collection |
 | `retriever.py` — `retrieve()` | 🔲 Your spec + implementation | Runs semantic search for a query, returns ranked chunks |
 | `generator.py` — Groq client init | ✅ Complete | Client is initialized and ready |
 | `generator.py` — `generate_response()` | 🔲 Your spec + implementation | Formats context and generates a grounded answer |

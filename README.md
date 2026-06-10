@@ -54,8 +54,8 @@ RulesBot will start and open in your browser. Before you implement the retrieval
 ai201-lab1-rulesbot-starter/
 ├── app.py              # Gradio UI and startup logic — fully built
 ├── config.py           # Settings (models, paths, retrieval params) — fully built
-├── ingest.py           # Document loading + chunking — TODO: chunk_document()
-├── retriever.py        # Vector store + semantic search — TODO: embed_and_store(), retrieve()
+├── ingest.py           # Document loading + chunking (complete)
+├── retriever.py        # Vector store + semantic search — TODO: retrieve()
 ├── generator.py        # LLM response generation — TODO: generate_response()
 ├── docs/               # Board game rule documents (pre-loaded)
 │   ├── catan.txt
@@ -86,7 +86,7 @@ ChromaDB persists to disk in `./chroma_db`. If you change your chunking strategy
 
 ```bash
 rm -rf chroma_db/   # Mac/Linux
-# or: rmdir /s chroma_db   # Windows
+# or: rmdir /s /q chroma_db   # Windows
 python app.py
 ```
 

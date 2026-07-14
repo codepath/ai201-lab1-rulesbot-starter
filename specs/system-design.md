@@ -55,9 +55,9 @@ A lightweight sentence-transformers model that runs locally with no API key or r
 
 ChromaDB runs locally and persists its index to `./chroma_db` on disk. This means ingestion only has to happen once — subsequent startups skip it if the collection is already populated. Similarity metric is cosine distance (configured in `retriever.py`).
 
-### LLM: Groq (`llama-3.3-70b-versatile`)
+### LLM: Groq (`meta-llama/llama-4-scout-17b-16e-instruct`)
 
-Groq provides fast inference on Llama 3.3 70B via a free API tier. The model is capable enough to follow grounding instructions reliably when they're written clearly. API key is loaded from `.env` and accessed via `config.py`.
+Groq provides fast inference on Llama 4 Scout via a free API tier. The model is capable enough to follow grounding instructions reliably when they're written clearly. API key is loaded from `.env` and accessed via `config.py`.
 
 ### Distance metric: cosine similarity
 

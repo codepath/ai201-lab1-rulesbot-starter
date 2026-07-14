@@ -54,7 +54,6 @@ def chunk_document(text, game_name):
     while start < len(text):
         end = start + chunk_size
         chunk_text = text[start:end].strip()
-
         if len(chunk_text) >= min_length:
             chunks.append({
                 "text": chunk_text,

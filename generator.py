@@ -7,27 +7,6 @@ _client = Groq(api_key=GROQ_API_KEY)
 def generate_response(query, retrieved_chunks):
     """
     Generate a grounded answer from retrieved rule chunks.
-
-    TODO — Milestone 3:
-
-    `retrieved_chunks` is the list returned by retrieve(). Each item is a dict:
-      - "text"     : the chunk text
-      - "game"     : the game name
-      - "distance" : similarity score (you can use this to filter weak matches)
-
-    Before writing code, talk through these with your group:
-      - How will you format the chunks into a context block for the prompt?
-      - What instructions will stop the model from answering beyond what the
-        rules say? (Grounding is the whole point — a confident wrong answer
-        is worse than an honest "I don't know.")
-      - How will you surface which game each answer comes from?
-
-    Your response should:
-      1. Answer using only the retrieved context — not the model's general knowledge
-      2. Make clear which game the answer comes from
-      3. Say so clearly when the answer isn't in the loaded rules
-
-    Return the response as a plain string.
     """
     if not retrieved_chunks:
         return (
@@ -35,5 +14,51 @@ def generate_response(query, retrieved_chunks):
             "Try rephrasing your question — or check that your ingestion pipeline is working."
         )
 
-    # Your implementation here.
-    return "⚙️ Response generation not yet implemented. Complete Milestone 3 to activate answers."
+    relevant_chunks = [
+        chunk for chunk in retrieved_chunks
+        if chunk["distance"] <= 0.5
+    ]
+
+    if not relevant_chunks:
+        return "I could not find enough information in the loaded rule books to answer that question."
+
+    context_parts = []
+
+    for chunk in relevant_chunks:
+        context_parts.append(
+            f"[Game: {chunk['game']} | Distance: {chunk['distance']}]\n"
+            f"{chunk['text']}"
+        )
+
+    context = "\n\n---\n\n".join(context_parts)
+
+    system_message = """
+You are RulesBot, a board game rules assistant.
+
+Answer the user's question using only the retrieved rule text provided in the context.
+Do not use outside knowledge.
+Do not make assumptions.
+If the answer is not clearly supported by the retrieved text, say that the loaded rules do not contain enough information to answer.
+
+Clearly identify which game the answer comes from using wording like:
+"According to the Catan rules..." or "Based on the Uno rules..."
+"""
+
+    user_message = f"""
+User question:
+{query}
+
+Retrieved rule context:
+{context}
+"""
+
+    response = _client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=[
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ],
+        temperature=0.2,
+    )
+
+    return response.choices[0].message.content

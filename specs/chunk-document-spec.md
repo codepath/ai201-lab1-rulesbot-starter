@@ -116,11 +116,13 @@ handle these cases better, at the cost of more implementation complexity.
 **Actual chunk count produced across all 8 rule books:**
 
 ```
-[your answer here]
+[Actual chunk count produced across all 8 rule books:
+
+149]
 ```
 
 **One thing that surprised you or didn't match your expectations:**
 
 ```
-[your answer here]
+[One thing that surprised me is that only 8 rule books produced 149 chunks. I expected fewer chunks, but the sliding window creates many overlapping pieces so the retriever has more chances to find the right rule.]
 ```

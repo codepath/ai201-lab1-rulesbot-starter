@@ -45,7 +45,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Describe how you will use `_collection.query()` to find relevant chunks. What arguments will you pass, and why?*
 
 ```
-[your answer here]
+I will use this '_collections.query()' to find the relevant chunks that will answer the user query. I pass query_texts(which has user query text in natural language and it has lists of user queries since chromaDB accepts like that), n_results(It returns the top matching results from the embedding collection stored), include(Here we include which parameters to output such as text, metadata and distance(which is cosine similarity score here))
 ```
 
 ---
@@ -55,7 +55,34 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Sketch out what one item in your return list looks like as a concrete example. Where does each field come from in the query results?*
 
 ```
-[your answer here]
+results = _collection.query(
+    query_texts=["how do you win at catan?"],
+    n_results=3,
+    include=["documents", "metadatas", "distances"],
+)
+
+results contain
+{
+    "documents": [
+        [
+            "The first matched chunk text",
+            "The second matched chunk text",
+            "The third matched chunk text"
+        ]
+    ],
+    "metadatas": [
+        [
+            {"game": "catan"},
+            {"game": "catan"},
+            {"game": "catan"}
+        ]
+    ],
+    "distances": [
+        [0.12, 0.18, 0.23]
+    ]
+}
+
+the each field comes from the ones we put in the 'include' field in the input. 
 ```
 
 ---
@@ -65,7 +92,16 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *`_collection.query()` returns nested lists. Describe what index you need to access to get the actual list of results for a single query, and why the nesting exists.*
 
 ```
-[your answer here]
+In the results, for every dict, we use the index - 0, since we have only sent in one user query. It will look like
+results = _collection.query(
+    query_texts=["how do you win at catan?"],
+    n_results=3,
+    include=["documents", "metadatas", "distances"],
+)
+
+documents = results["documents"][0]
+metadatas = results["metadatas"][0]
+distances = results["distances"][0]
 ```
 
 ---
@@ -75,7 +111,17 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Will you filter out results above a certain distance score, or return all `n_results` regardless of how relevant they are? What are the tradeoffs of each approach?*
 
 ```
-[your answer here]
+I will return all `n_results` without a distance threshold initially, because:
+- It guarantees results whenever the collection is not empty
+- Ensures the LLM has context to work with, even if similarity is lower
+- Filtering by distance threshold might return 0 results if the threshold is too strict
+
+If I filter by a distance threshold after getting n_results:
+- Results could be fewer than requested (or empty)
+- Quality improves by removing weak matches
+- But I lose the guarantee of getting any results
+
+I'll use n_results for now and optionally add threshold filtering later based on testing.
 ```
 
 ---
@@ -85,7 +131,9 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *How does your implementation behave when: (a) the collection is empty, (b) the query matches no chunks well, (c) the query matches chunks from multiple games?*
 
 ```
-[your answer here]
+(a) when collection is empty, we don't get any response. 
+(b) when query matches no chunks well, it's giving me the more distance with other chunks
+(c) when query matches chunks from multiple games, it's giving me the one with more less score
 ```
 
 ---
@@ -97,10 +145,10 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 **Test query and top result returned:**
 
 ```
-Query: [your test query]
-Top result game: [game name]
-Distance score: [score]
-Does it make sense? [yes / no / explain]
+Query: how to come out of jail?
+Top result game: Monopoly
+Distance score: 0.336
+Does it make sense? yes, that chunk contains the answer. The LLM model can answer that. 
 ```
 
 **One thing about the query results that surprised you:**

@@ -34,6 +34,43 @@ def generate_response(query, retrieved_chunks):
             "I couldn't find anything relevant in the loaded rule books. "
             "Try rephrasing your question — or check that your ingestion pipeline is working."
         )
+    context_parts = []
+    for i, chunk in enumerate(retrieved_chunks, start=1): 
+       context_parts.append( f"[Chunk {i}]\n" f"Game: {chunk['game']}\n" f"Distance: {chunk['distance']}\n" f"text: {chunk['text']}\n" f"--------------" )
+    
+    context = "\n".join(context_parts)
 
+    system_prompt = """
+
+    You are a board game rules assistant. Answer questions using only the information provided in the retrieved rule book chunks. Do not use outside knowledge, prior training data, assumptions, or general knowledge about any game. If the retrieved chunks do not contain enough information to answer the question, do not guess or infer. Instead, return the fallback response exactly as specified.
+
+    For every answer, identify the game that the supporting information came from. Include a citation in the format:
+
+    Source:
+
+    If information from multiple games is used, list all relevant game names.
+
+    Fallback response:
+    I could not find enough information in the loaded rule books to answer that question.
+    """
+
+    user_prompt = f"""
+
+    Context:
+    {context}
+
+    Question:
+    {query}
+    """
+
+    response = _client.chat.completions.create(
+       model=LLM_MODEL,
+       messages=[
+          {"role": "system", "content": system_prompt},
+          {"role": "user", "content": user_prompt},
+      ],
+  )
+
+    
     # Your implementation here.
-    return "⚙️ Response generation not yet implemented. Complete Milestone 3 to activate answers."
+    return response.choices[0].message.content.strip()

@@ -55,9 +55,9 @@ A lightweight sentence-transformers model that runs locally with no API key or r
 
 ChromaDB runs locally and persists its index to `./chroma_db` on disk. This means ingestion only has to happen once — subsequent startups skip it if the collection is already populated. Similarity metric is cosine distance (configured in `retriever.py`).
 
-### LLM: Groq (`openai/gpt-oss-20b`)
+### LLM: Groq (`openai/gpt-oss-120b`)
 
-Groq provides fast inference on OpenAI's open-weight gpt-oss-20b via a free API tier. The model is capable enough to follow grounding instructions reliably when they're written clearly. API key is loaded from `.env` and accessed via `config.py`.
+Groq provides fast inference on OpenAI's open-weight gpt-oss-120b via a free API tier. The model is capable enough to follow grounding instructions reliably when they're written clearly. API key is loaded from `.env` and accessed via `config.py`.
 
 ### Distance metric: cosine similarity
 
